@@ -1,0 +1,29 @@
+modLoader="javafml" #mandatory
+loaderVersion="[46,)"
+license="LGPLv3"
+issueTrackerURL="https://github.com/PotionSeeker/Block-Swap-Advanced" #optional
+[[mods]]
+modId="block_swap_advanced"
+version="${file.jarVersion}"
+displayName="Block Swap Advanced"
+displayURL="https://github.com/PotionSeeker/Block-Swap-Advanced"
+logoFile="assets/block_swap_advanced/block_swap_icon.gif"
+credits="Corgi Taco, J.T. McQuigg (JT122406)"
+authors="PotionSeeker"
+description='''
+Modify the blocks that make up your world by swapping them around.
+'''
+[[dependencies.block_swap_advanced]]
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[46,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.block_swap_advanced]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20,)"
+    ordering="NONE"
+    side="BOTH"
+

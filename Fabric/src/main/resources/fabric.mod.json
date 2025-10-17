@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "block_swap_advanced",
+  "version": "${version}",
+  "name": "Block Swap Advanced",
+  "description": "Modify the blocks that make up your world by swapping them around.",
+  "authors": [
+    "PotionSeeker"
+  ],
+  "contributors": [
+    {
+      "name": "Corgi Taco",
+      "contact": {
+        "homepage": "https://github.com/CorgiTaco-MC"
+      }
+    },
+    {
+      "name": "J.T. McQuigg (JT122406)",
+      "contact": {
+        "homepage": "https://github.com/JT122406"
+      }
+    }
+  ],
+  "contact": {
+    "sources": "https://github.com/PotionSeeker/Block-Swap-Advanced"
+  },
+  "license": "LGPLv3",
+  "icon": "assets/block_swap_advanced/block_swap_icon.gif",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "potionseeker.block_swap_advanced.BlockSwapFabric"
+    ]
+  },
+  "mixins": [
+    "block_swap_advanced.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14",
+    "fabric": "*",
+    "minecraft": ">=1.20",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
+  

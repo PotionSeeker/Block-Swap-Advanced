@@ -1,0 +1,151 @@
+import com.modrinth.minotaur.TaskModrinthUpload
+
+import java.util.stream.Collectors
+
+buildscript {
+    repositories {
+        maven { url = 'https://maven.parchmentmc.org' }
+    }
+}
+
+plugins {
+    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'maven-publish'
+    id 'idea'
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id "net.darkhax.curseforgegradle" version "1.1.23"
+    id "com.modrinth.minotaur" version "2.+"
+}
+
+tasks.build.dependsOn(shadowJar)
+
+configurations {
+    shadow
+    implementation.extendsFrom(shadow)
+}
+shadowJar {
+    configurations = [project.configurations.shadow]
+    relocate 'blue.endless.jankson', "${project.group}.shadow.blue.endless.jankson"
+}
+
+archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
+
+repositories {
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    maven {
+        name = 'Forge'
+        url = 'https://maven.minecraftforge.net'
+    }
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name = "JitPack"
+        url = "https://jitpack.io"
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    }
+
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    implementation project(":Common")
+}
+
+loom {
+    runs {
+        def args = []
+
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArgs(args)
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArgs(args)
+        }
+    }
+}
+
+processResources {
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+//    from project(":Common").sourceSets.main.resources
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+
+    filesMatching("${mod_id}.mixins.json") {
+        expand "refmap_target": "${archivesBaseName}-"
+    }
+}
+
+//tasks.withType(JavaCompile) {
+//    source(project(":Common").sourceSets.main.allSource)
+//}
+tasks.withType(Javadoc) {
+    failOnError false
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${mod_name}" }
+    }
+}
+// Disable to build with gradle //TODO: Fix gradle + building w/ intellij
+sourceSets {
+    main {
+        java {
+//            srcDir 'src/main/java'
+            srcDirs project(':Common').sourceSets.main.java.srcDirs
+        }
+        resources {
+//            srcDir 'src/main/resources'
+            srcDirs project(':Common').sourceSets.main.resources.srcDirs
+        }
+    }
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+}
+
+task fabric_checkForRefmap() {
+    doLast {
+        File file1 = remapJar.archiveFile.get().asFile
+        logger.info("Verifying refmap exists...")
+        if (file1.exists()) {
+            FileTree files = zipTree(file1)
+            Set<String> fileNames = files.getFiles().stream().map(file -> file.getName()).collect(Collectors.toSet())
+
+            String refmap = "${archivesBaseName}-refmap.json"
+            if (!fileNames.contains(refmap)) {
+                throw new IllegalStateException("Refmap is missing.")
+            }
+        } else {
+            throw new IllegalStateException("File is missing.")
+        }
+        logger.info("Refmap found!")
+    }
+}
+
+String changelogText = projectDir.toPath().getParent().resolve("CHANGELOG.md").getText('UTF-8')
