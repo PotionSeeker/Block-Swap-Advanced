@@ -18,27 +18,21 @@ public abstract class MixinLevel {
 
     @ModifyArg(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"), index = 1)
     private BlockState modifyBlockState3(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
-        BlockSwap.LOGGER.info("MixinLevel.modifyBlockState3 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
-        if (!isClientSide() && BlockSwapConfig.getConfig(false).contains(state)) {
-            BlockSwap.LOGGER.info("Server-side, state {} in config, remapping", state);
+        BlockSwap.LOGGER.debug("MixinLevel.modifyBlockState3 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
+        if (!isClientSide() && BlockSwap.CONFIG_PATH != null && BlockSwapConfig.getConfig(false).contains(state)) {
             BlockState newState = Swapper.remapState(state, (Level) (Object) this, pos, true);
-            BlockSwap.LOGGER.info("Remapped state: {} to {}", state, newState);
             return newState;
         }
-        BlockSwap.LOGGER.info("Skipping swap: isClientSide={}, contains={}", isClientSide(), BlockSwapConfig.getConfig(false).contains(state));
         return state;
     }
 
     @ModifyArg(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setBlockState(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), index = 1)
     private BlockState modifyBlockState4(BlockPos pos, BlockState state, boolean lock) {
-        BlockSwap.LOGGER.info("MixinLevel.modifyBlockState4 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
-        if (!isClientSide() && BlockSwapConfig.getConfig(false).contains(state)) {
-            BlockSwap.LOGGER.info("Server-side, state {} in config, remapping", state);
+        BlockSwap.LOGGER.debug("MixinLevel.modifyBlockState4 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
+        if (!isClientSide() && BlockSwap.CONFIG_PATH != null && BlockSwapConfig.getConfig(false).contains(state)) {
             BlockState newState = Swapper.remapState(state, (Level) (Object) this, pos, true);
-            BlockSwap.LOGGER.info("Remapped state: {} to {}", state, newState);
             return newState;
         }
-        BlockSwap.LOGGER.info("Skipping swap: isClientSide={}, contains={}", isClientSide(), BlockSwapConfig.getConfig(false).contains(state));
         return state;
     }
 }

@@ -27,16 +27,38 @@ public class JanksonUtil {
             String jsonString = Files.readString(path);
             JsonElement jsonElement = Jankson.builder().build().load(jsonString);
             com.google.gson.JsonElement gsonElement = com.google.gson.JsonParser.parseString(jsonElement.toJson(false, false));
-            BlockSwap.LOGGER.info("Parsed JSON from {}: {}", path, gsonElement);
+            BlockSwap.LOGGER.debug("Parsed JSON from {}: {}", path, gsonElement);
             DataResult<T> result = codec.parse(ops, gsonElement);
             if (result.error().isPresent()) {
                 throw new DeserializationException(result.error().get().message());
             }
             T config = result.result().get();
-            BlockSwap.LOGGER.info("Deserialized config: {}", config);
+            BlockSwap.LOGGER.debug("Deserialized config: {}", config);
             return config;
         } catch (SyntaxError e) {
             throw new DeserializationException("Syntax error in JSON5 file: " + e.getMessage());
+        }
+    }
+
+    public static <T> DataResult<T> readConfigWithResult(Path path, Codec<T> codec, DynamicOps<com.google.gson.JsonElement> ops) {
+        try {
+            String jsonString = Files.readString(path);
+            JsonElement jsonElement = Jankson.builder().build().load(jsonString);
+            com.google.gson.JsonElement gsonElement = com.google.gson.JsonParser.parseString(jsonElement.toJson(false, false));
+            BlockSwap.LOGGER.debug("Parsed JSON from {}: {}", path, gsonElement);
+            DataResult<T> result = codec.parse(ops, gsonElement);
+            if (result.result().isPresent()) {
+                BlockSwap.LOGGER.debug("Deserialized config: {}", result.result().get());
+            } else if (result.error().isPresent()) {
+                BlockSwap.LOGGER.error("Failed to parse config: {}", result.error().get().message());
+            }
+            return result;
+        } catch (IOException e) {
+            return DataResult.error(() -> "Failed to read JSON5 file: " + e.getMessage());
+        } catch (SyntaxError e) {
+            return DataResult.error(() -> "Syntax error in JSON5 file: " + e.getMessage());
+        } catch (Exception e) {
+            return DataResult.error(() -> "Unexpected error parsing JSON5 file: " + e.getMessage());
         }
     }
 
@@ -48,15 +70,16 @@ public class JanksonUtil {
                 return;
             }
             com.google.gson.JsonElement jsonElement = result.result().get();
-            if (!(jsonElement instanceof com.google.gson.JsonObject)) {
-                BlockSwap.LOGGER.error("Config encoding did not produce a JSON object");
-                return;
-            }
-            com.google.gson.JsonObject jsonObject = (com.google.gson.JsonObject) jsonElement;
             Files.createDirectories(path.getParent());
-            String jsonString = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonObject);
-            String output = header + "\n" + jsonString;
-            Files.write(path, output.getBytes());
+            String jsonString = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement);
+            StringBuilder output = new StringBuilder(header + "\n");
+            if (!comments.isEmpty()) {
+                output.append("// Comments:\n");
+                comments.forEach((key, value) -> output.append("// ").append(key).append(": ").append(value).append("\n"));
+            }
+            output.append(jsonString);
+            Files.write(path, output.toString().getBytes());
+            BlockSwap.LOGGER.debug("Wrote config to {}: {}", path, jsonString);
         } catch (IOException e) {
             BlockSwap.LOGGER.error("Failed to write config to {}: {}", path, e.getMessage());
         }

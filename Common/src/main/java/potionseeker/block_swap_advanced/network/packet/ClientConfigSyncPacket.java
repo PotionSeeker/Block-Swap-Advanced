@@ -1,7 +1,9 @@
 package potionseeker.block_swap_advanced.network.packet;
 
+import potionseeker.block_swap_advanced.BlockSwap;
 import potionseeker.block_swap_advanced.config.BlockSwapConfig;
 import potionseeker.block_swap_advanced.network.packet.util.PacketHandle;
+import potionseeker.block_swap_advanced.swapper.Swapper;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class ClientConfigSyncPacket implements PacketHandle {
@@ -22,6 +24,8 @@ public class ClientConfigSyncPacket implements PacketHandle {
 
     @Override
     public void handle() {
-        BlockSwapConfig.getConfig(blockSwapConfig);
+        BlockSwap.LOGGER.info("Client received config sync: retroGen={}, redoGen={}, swapEntries={}",
+                blockSwapConfig.retroGen(), blockSwapConfig.redoGen(), blockSwapConfig.swapEntries().size());
+        Swapper.updateConfig(blockSwapConfig); // Update Swapper with synced config
     }
 }

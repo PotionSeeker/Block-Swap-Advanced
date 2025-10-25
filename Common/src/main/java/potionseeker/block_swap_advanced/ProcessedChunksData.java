@@ -17,12 +17,14 @@ public class ProcessedChunksData extends SavedData {
     private static final Logger LOGGER = LogManager.getLogger("BlockSwap");
     private static final String DATA_NAME = "block_swap_processed";
     private final Set<ChunkPos> processedChunks = new HashSet<>();
+    private final Set<ChunkPos> processedThisSession = new HashSet<>();
+    private String configHash = "";
 
     public static ProcessedChunksData load(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            ProcessedChunksData::load,
-            () -> new ProcessedChunksData(),
-            DATA_NAME
+                ProcessedChunksData::load,
+                () -> new ProcessedChunksData(),
+                DATA_NAME
         );
     }
 
@@ -37,9 +39,34 @@ public class ProcessedChunksData extends SavedData {
         }
     }
 
+    public boolean wasProcessedThisSession(ChunkPos pos) {
+        return processedThisSession.contains(pos);
+    }
+
+    public void markProcessedThisSession(ChunkPos pos) {
+        if (processedThisSession.add(pos)) {
+            LOGGER.debug("Marked chunk {} as processed this session", pos);
+            setDirty();
+        }
+    }
+
+    public void updateConfigHash(String newHash) {
+        if (!configHash.equals(newHash)) {
+            configHash = newHash;
+            processedChunks.clear();
+            processedThisSession.clear();
+            LOGGER.debug("Config hash updated to {}, cleared processed chunks", newHash);
+            setDirty();
+        }
+    }
+
+    public String getConfigHash() {
+        return configHash;
+    }
+
     private static ProcessedChunksData load(CompoundTag tag) {
         ProcessedChunksData data = new ProcessedChunksData();
-        ListTag chunkList = tag.getList("ProcessedChunks", Tag.TAG_LONG); // Type 4 is LongTag
+        ListTag chunkList = tag.getList("ProcessedChunks", Tag.TAG_LONG);
         for (int i = 0; i < chunkList.size(); i++) {
             Tag element = chunkList.get(i);
             if (element instanceof LongTag longTag) {
@@ -47,7 +74,8 @@ public class ProcessedChunksData extends SavedData {
                 data.processedChunks.add(new ChunkPos(pos));
             }
         }
-        LOGGER.debug("Loaded {} processed chunks", data.processedChunks.size());
+        data.configHash = tag.getString("ConfigHash");
+        LOGGER.debug("Loaded {} processed chunks with config hash {}", data.processedChunks.size(), data.configHash);
         return data;
     }
 
@@ -58,7 +86,8 @@ public class ProcessedChunksData extends SavedData {
             chunkList.add(LongTag.valueOf(pos.toLong()));
         }
         tag.put("ProcessedChunks", chunkList);
-        LOGGER.debug("Saving {} processed chunks", processedChunks.size());
+        tag.putString("ConfigHash", configHash);
+        LOGGER.debug("Saving {} processed chunks with config hash {}", processedChunks.size(), configHash);
         return tag;
     }
 }
