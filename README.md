@@ -53,13 +53,15 @@ These are all the currently availible options that can be used to define how blo
 - An example 'block_swap.json5' can be found in the mod's config folder (block_swap_advanced). This can be used as a template in 'defaultconfig'
 - All fields are optional unless specified. Omitted fields use default internal values.
 - Block states use block IDs and properties. Set 'generate_block_info' to 'true' to generate a list of all block information for reference).
-- Swaps will occur during world generation unless using defer_swap, retro_gen, redo_gen, replace_placement, or only_replace_placements.
+- To have swaps occur during world generation, use 'retro_gen' along with putting a template block_swap.json5 in 'defaultconfig'.
+- When using 'retro_gen', upon leaving and rejoining the world, defined block swaps will occur once for all chunks that haven't been processed.
+- To have swaps reload every time the world is loaded, use 'redo_gen'.
 - When using 'min_y_buffer' or 'max_y_buffer', buffer zones create a gradual transition for more natural-looking block swaps.
 - Use 'defer_swap' for blocks that other blocks depend on during generation (for example, if you modify dripstone_block without defer_swap, pointed_dripstone won't generate. To avoid this, use defer_swap).
 - When swapping occurs for a large amount of blocks, there may be lag during world load. You can use 'chunk_swap_range' to limit block swapping to only occur within a certain range of players to help with preformance.
 
  - Report issues or request features via the mod's github (https://github.com/PotionSeeker/Block-Swap-Advanced).
- - Check logs (latest.log) with verbose_logging enabled for debugging.
+ - Check logs (latest.log) with verbose_logging enabled for debugging. Be careful as using 'verbose_logging' can cause lag due to adding information to latest.log.
 
 # Warning
 - Block Swap Advanced can be used to completely change your world, but if you aren't careful, it could also ruin everything. Make a backup of your world before applying any changes if you aren't sure.
