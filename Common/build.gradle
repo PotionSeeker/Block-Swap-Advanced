@@ -9,7 +9,6 @@ minecraft {
     version(minecraft_version)
     runs {
         if (project.hasProperty('common_runs_enabled') ? project.findProperty('common_runs_enabled').toBoolean() : true) {
-
             server(project.hasProperty('common_server_run_name') ? project.findProperty('common_server_run_name') : 'vanilla_server') {
                 workingDirectory(this.file("run"))
             }
@@ -31,12 +30,13 @@ dependencies {
 
 processResources {
     def buildProps = project.properties.clone()
-
-    filesMatching(['pack.mcmeta']) {
+    buildProps.put("mod_id", "${mod_id}") // Ensure mod_id is available
+    filesMatching(['pack.mcmeta', 'block_swap_advanced.mixins.json']) {
         expand buildProps
     }
 }
 
 tasks.withType(Javadoc) {
     failOnError false
+    options.addStringOption('Xdoclint:none', '-quiet')
 }

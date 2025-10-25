@@ -1,12 +1,5 @@
 import com.modrinth.minotaur.TaskModrinthUpload
-
 import java.util.stream.Collectors
-
-buildscript {
-    repositories {
-        maven { url = 'https://maven.parchmentmc.org' }
-    }
-}
 
 plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
@@ -24,9 +17,11 @@ configurations {
     shadow
     implementation.extendsFrom(shadow)
 }
+
 shadowJar {
     configurations = [project.configurations.shadow]
     relocate 'blue.endless.jankson', "${project.group}.shadow.blue.endless.jankson"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
@@ -55,7 +50,6 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
     }
-
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
@@ -65,7 +59,6 @@ dependencies {
 loom {
     runs {
         def args = []
-
         client {
             client()
             setConfigName("Fabric Client")
@@ -84,24 +77,29 @@ loom {
 }
 
 processResources {
-
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-//    from project(":Common").sourceSets.main.resources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    inputs.property "mod_id", "${mod_id}"
+    from(project(":Common").sourceSets.main.resources) {
+        include '**/*.json', '**/*.json5', '**/*.toml', '**/*.mcmeta'
+        exclude 'block_swap_advanced.mixins.json', 'block_swap_advanced.refmap.json', '**/*.mixins.json', '**/*.refmap.json'
     }
-
-    filesMatching("${mod_id}.mixins.json") {
-        expand "refmap_target": "${archivesBaseName}-"
+    from(sourceSets.main.resources) {
+        include 'fabric.mod.json', 'block_swap_advanced.mixins.json'
+        exclude 'block_swap_advanced_forge.mixins.json' // Prevent accidental inclusion
+    }
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version, "mod_id": "${mod_id}"
+    }
+    filesMatching("block_swap_advanced.mixins.json") {
+        expand "refmap_target": "${mod_id}-", "mod_id": "${mod_id}"
     }
 }
 
-//tasks.withType(JavaCompile) {
-//    source(project(":Common").sourceSets.main.allSource)
-//}
+tasks.withType(JavaCompile) {
+    source(project(":Common").sourceSets.main.allSource)
+}
+
 tasks.withType(Javadoc) {
     failOnError false
 }
@@ -110,23 +108,16 @@ jar {
     from("LICENSE") {
         rename { "${it}_${mod_name}" }
     }
-}
-// Disable to build with gradle //TODO: Fix gradle + building w/ intellij
-sourceSets {
-    main {
-        java {
-//            srcDir 'src/main/java'
-            srcDirs project(':Common').sourceSets.main.java.srcDirs
-        }
-        resources {
-//            srcDir 'src/main/resources'
-            srcDirs project(':Common').sourceSets.main.resources.srcDirs
-        }
-    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 remapJar {
     input.set shadowJar.archiveFile
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+sourcesJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 task fabric_checkForRefmap() {
@@ -136,15 +127,14 @@ task fabric_checkForRefmap() {
         if (file1.exists()) {
             FileTree files = zipTree(file1)
             Set<String> fileNames = files.getFiles().stream().map(file -> file.getName()).collect(Collectors.toSet())
-
             String refmap = "${archivesBaseName}-refmap.json"
             if (!fileNames.contains(refmap)) {
-                throw new IllegalStateException("Refmap is missing.")
+                throw new IllegalStateException("Refmap ${refmap} is missing.")
             }
         } else {
             throw new IllegalStateException("File is missing.")
         }
-        logger.info("Refmap found!")
+        logger.info("Refmap ${refmap} found!")
     }
 }
 

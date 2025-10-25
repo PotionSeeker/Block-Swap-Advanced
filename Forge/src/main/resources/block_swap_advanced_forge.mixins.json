@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "potionseeker.block_swap_advanced.mixin",
-  "refmap": "${mod_id}-refmap.json",
+  "refmap": "block_swap_advanced_forge.refmap.json",
   "mixins": [],
   "client": [],
   "server": [
