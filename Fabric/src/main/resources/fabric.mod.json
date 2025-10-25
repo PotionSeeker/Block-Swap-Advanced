@@ -9,6 +9,12 @@
   ],
   "contributors": [
     {
+      "name": "PotionSeeker",
+      "contact": {
+        "homepage": "https://github.com/PotionSeeker"
+      }
+    },
+    {
       "name": "Corgi Taco",
       "contact": {
         "homepage": "https://github.com/CorgiTaco-MC"
@@ -25,7 +31,7 @@
     "sources": "https://github.com/PotionSeeker/Block-Swap-Advanced"
   },
   "license": "LGPLv3",
-  "icon": "assets/block_swap_advanced/block_swap_icon.gif",
+  "icon": "assets/block_swap_advanced/block_swap_advanced_edition.png",
   "environment": "*",
   "entrypoints": {
     "main": [

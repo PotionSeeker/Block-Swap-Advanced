@@ -7,8 +7,8 @@ modId="block_swap_advanced"
 version="${file.jarVersion}"
 displayName="Block Swap Advanced"
 displayURL="https://github.com/PotionSeeker/Block-Swap-Advanced"
-logoFile="assets/block_swap_advanced/block_swap_icon.gif"
-credits="Corgi Taco, J.T. McQuigg (JT122406)"
+logoFile="assets/block_swap_advanced/block_swap_advanced_edition.png"
+credits="PotionSeeker, Corgi Taco, J.T. McQuigg (JT122406)"
 authors="PotionSeeker"
 description='''
 Modify the blocks that make up your world by swapping them around.
