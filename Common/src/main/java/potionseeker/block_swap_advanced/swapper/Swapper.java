@@ -6,7 +6,7 @@ import net.minecraft.world.level.ChunkPos;
 import potionseeker.block_swap_advanced.BlockSwap;
 import potionseeker.block_swap_advanced.config.BlockSwapConfig;
 import potionseeker.block_swap_advanced.ProcessedChunksData;
-import potionseeker.block_swap_advanced.mixin.access.StateHolderAccess;
+
 import potionseeker.block_swap_advanced.serialization.CodecUtil;
 import potionseeker.block_swap_advanced.serialization.CommentedCodec;
 
@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 public class Swapper {
     public static final Codec<BlockState> COMMENTED_STATE_CODEC = CodecUtil.BLOCK_STATE_CODEC;
 
-    // Core fields for block swapping (9 fields)
     public record CoreSwapEntry(
             BlockState oldState,
             BlockState newState,
@@ -63,7 +62,6 @@ public class Swapper {
         );
     }
 
-    // Filter fields for environmental constraints (6 fields)
     public record FilterEntry(
             List<String> dimensions_whitelist,
             List<String> dimensions_blacklist,
@@ -84,7 +82,6 @@ public class Swapper {
         );
     }
 
-    // Combined SwapEntry class to maintain interface
     public static class SwapEntry {
         private final CoreSwapEntry core;
         private final FilterEntry filter;
@@ -107,7 +104,6 @@ public class Swapper {
             this.defer_swap = defer_swap;
         }
 
-        // Getter methods to match original SwapEntry record
         public BlockState oldState() { return core.oldState(); }
         public BlockState newState() { return core.newState(); }
         public boolean replacePlacement() { return core.replacePlacement(); }
@@ -160,10 +156,10 @@ public class Swapper {
 
     public static boolean isWithinChunkSwapRange(ServerLevel serverLevel, ChunkPos chunkPos, int chunkSwapRange) {
         if (chunkSwapRange < 0) {
-            return true; // Process all loaded chunks
+            return true;
         }
         if (chunkSwapRange == 0) {
-            return false; // No chunks processed
+            return false;
         }
         for (ServerPlayer player : serverLevel.players()) {
             ChunkPos playerChunk = new ChunkPos(BlockPos.containing(player.getPosition(1.0F)));
@@ -208,7 +204,6 @@ public class Swapper {
                 continue;
             }
 
-            // Property matching
             BlockState oldState = entry.oldState();
             boolean propertiesMatch = true;
             if (!entry.ignoreBlockProperties() && !oldState.getValues().isEmpty()) {
@@ -224,7 +219,6 @@ public class Swapper {
                 continue;
             }
 
-            // Y-range and buffer zones
             int effectiveMinY = entry.minY() == Integer.MIN_VALUE ? world.getMinBuildHeight() : entry.minY();
             int effectiveMaxY = entry.maxY() == Integer.MAX_VALUE ? world.getMaxBuildHeight() : entry.maxY();
             float swapProbability = entry.blockSwapRand();
@@ -255,13 +249,11 @@ public class Swapper {
                 }
             }
 
-            // Apply randomization
             if (swapProbability < 1.0F && random.nextFloat() > swapProbability) {
                 BlockSwap.LOGGER.debug("Swap skipped due to randomization: swapProbability={}, random={}", swapProbability, random.nextFloat());
                 continue;
             }
 
-            // Dimension checks
             boolean dimensionAllowed = entry.dimensions_whitelist().isEmpty() || entry.dimensions_whitelist().contains(dimensionId);
             if (dimensionAllowed && entry.dimensions_blacklist().contains(dimensionId)) {
                 dimensionAllowed = false;
@@ -350,10 +342,10 @@ public class Swapper {
             updateConfig(BlockSwapConfig.getConfig(true));
         }
         if (!(chunk.getLevel() instanceof ServerLevel serverLevel)) {
-            return; // Server-side only
+            return;
         }
         if (!CONFIG.retroGen() && !CONFIG.redoGen()) {
-            return; // Skip if neither retroGen nor redoGen is enabled
+            return;
         }
 
         ChunkPos chunkPos = chunk.getPos();
@@ -367,10 +359,9 @@ public class Swapper {
         boolean isProcessed = data.isChunkProcessed(chunkPos);
         if (!CONFIG.redoGen() && isProcessed && newConfigHash.equals(data.getConfigHash())) {
             BlockSwap.LOGGER.debug("Skipping chunk {}: already processed and config unchanged", chunkPos);
-            return; // Skip already processed chunks unless redoGen is enabled or config changed
+            return;
         }
 
-        // Update config hash if necessary
         if (!newConfigHash.equals(data.getConfigHash()) && CONFIG.redoGen()) {
             data.updateConfigHash(newConfigHash);
             BlockSwap.LOGGER.debug("Updated config hash to {}, clearing processed chunks for redoGen", newConfigHash);

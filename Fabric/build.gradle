@@ -54,6 +54,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
     implementation project(":Common")
+    // Add jankson dependency explicitly
+    modImplementation 'blue.endless:jankson:1.2.1'
+    shadow 'blue.endless:jankson:1.2.1' // Include in shadow configuration for bundling
 }
 
 loom {

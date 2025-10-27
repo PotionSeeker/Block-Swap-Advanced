@@ -16,7 +16,7 @@ public abstract class MixinLevel {
     @Shadow
     public abstract boolean isClientSide();
 
-    @ModifyArg(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"), index = 1)
+    @ModifyArg(method = {"setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"), index = 1)
     private BlockState modifyBlockState3(BlockPos pos, BlockState state, int flags, int maxUpdateDepth) {
         BlockSwap.LOGGER.debug("MixinLevel.modifyBlockState3 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
         if (!isClientSide() && BlockSwap.CONFIG_PATH != null && BlockSwapConfig.getConfig(false).contains(state)) {
@@ -26,7 +26,7 @@ public abstract class MixinLevel {
         return state;
     }
 
-    @ModifyArg(method = "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setBlockState(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), index = 1)
+    @ModifyArg(method = {"setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setBlockState(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;"), index = 1)
     private BlockState modifyBlockState4(BlockPos pos, BlockState state, boolean lock) {
         BlockSwap.LOGGER.debug("MixinLevel.modifyBlockState4 called: state={}, pos={}, isClientSide={}", state, pos, isClientSide());
         if (!isClientSide() && BlockSwap.CONFIG_PATH != null && BlockSwapConfig.getConfig(false).contains(state)) {

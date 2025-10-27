@@ -232,13 +232,12 @@ public class BlockSwap {
         """;
 
     public BlockSwap() {
-        // Removed initialization here
+        // Removed initialization because
     }
 
     public static void init(Path worldPath) {
         // Set paths for world-specific config handling
         CONFIG_PATH = worldPath.resolve("serverconfig");
-        // Ensure defaultconfigs folder exists
         try {
             Files.createDirectories(DEFAULT_CONFIG_PATH);
             BlockSwap.LOGGER.debug("Ensured defaultconfigs folder exists at: {}", DEFAULT_CONFIG_PATH);
@@ -249,8 +248,7 @@ public class BlockSwap {
     }
 
     public static void initMod() {
-        // Called during mod initialization (e.g., FMLCommonSetupEvent or ModInitializer)
-        // Ensure defaultconfigs folder exists
+        // Called during mod initialization to ensure defaultconfigs folder exists
         try {
             Files.createDirectories(DEFAULT_CONFIG_PATH);
             BlockSwap.LOGGER.debug("Ensured defaultconfigs folder exists at: {}", DEFAULT_CONFIG_PATH);

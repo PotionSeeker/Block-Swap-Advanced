@@ -56,7 +56,6 @@ public record BlockSwapConfig(
                 : Paths.get("config").resolve(BlockSwap.MOD_ID).resolve("block_swap.json5");
 
         try {
-            // Ensure defaultconfigs folder exists
             Files.createDirectories(BlockSwap.DEFAULT_CONFIG_PATH);
             BlockSwap.LOGGER.debug("Ensured defaultconfigs folder exists at: {}", BlockSwap.DEFAULT_CONFIG_PATH);
 
@@ -68,7 +67,7 @@ public record BlockSwapConfig(
                     BlockSwap.LOGGER.info("Copied default config from {} to: {}", defaultConfigPath, configPath);
                 } else {
                     JanksonUtil.createConfig(configPath, CODEC, CONFIG_HEADER, new Object2ObjectOpenHashMap<>(), JanksonJsonOps.INSTANCE, DEFAULT);
-                    // Also create default config in defaultconfigs for future worlds
+
                     JanksonUtil.createConfig(defaultConfigPath, CODEC, CONFIG_HEADER, new Object2ObjectOpenHashMap<>(), JanksonJsonOps.INSTANCE, DEFAULT);
                     BlockSwap.LOGGER.info("Created default config at: {} and {}", configPath, defaultConfigPath);
                 }

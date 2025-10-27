@@ -4,7 +4,7 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven { url = "https://plugins.gradle.org/m2/" }
+        maven { url = 'https://plugins.gradle.org/m2/' }
         mavenCentral()
     }
     dependencies {
@@ -16,8 +16,8 @@ buildscript {
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id "net.darkhax.curseforgegradle" version "1.1.23"
-    id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version '1.1.23'
+    id 'com.modrinth.minotaur' version '2.+'
 }
 apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle'
@@ -28,31 +28,38 @@ apply plugin: 'org.spongepowered.mixin'
 tasks.build.dependsOn(shadowJar)
 
 configurations {
-    shadow
-    implementation.extendsFrom(shadow)
-    library
-    implementation.extendsFrom library
+    shade
+    implementation.extendsFrom shade
+}
+
+repositories {
+    maven { url = 'https://maven.minecraftforge.net' }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    mavenCentral()
 }
 
 minecraft.runs.all {
     lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+        configurations.shade.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
     }
 }
 
 archivesBaseName = "${mod_name}-forge-${minecraft_version}"
 
 shadowJar {
-    configurations = [project.configurations.shadow]
+    configurations = [project.configurations.shade]
     archiveClassifier = ''
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Prevent duplicates in shadow JAR
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    from project(':Common').sourceSets.main.output
 }
+
 reobf {
-    shadowJar { } // Remove invalid duplicatesStrategy
+    shadowJar { }
 }
 
 minecraft {
-    mappings channel: 'parchment', version: "${minecraft_version}-${parchment_version}-${minecraft_version}"
+    mappings channel: 'official', version: '1.20.1'
 
     if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
         accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -60,60 +67,88 @@ minecraft {
     }
 
     runs {
-        def runArgs = []
         client {
-            jvmArgs runArgs
             workingDirectory project.file('run')
-            args "-mixin.config=${mod_id}_forge.mixins.json"
-            ideaModule "${rootProject.name}.${project.name}.main"
+            property 'forge.logging.markers', 'REGISTRIES,MIXIN'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.debug', 'true'
+            property 'mixin.debug.export', 'true'
+            property 'mixin.debug.verbose', 'true'
+            args "-mixin.config=${mod_id}.mixins.json", "-mixin.config=${mod_id}_forge.mixins.json"
+            environment "MOD_CLASSES", "${sourceSets.main.output.classesDirs.asPath};${sourceSets.main.output.resourcesDir.path};${project(':Common').sourceSets.main.output.classesDirs.asPath};${project(':Common').sourceSets.main.output.resourcesDir.path}"
         }
         server {
-            jvmArgs runArgs
             workingDirectory project.file('run')
-            args "-mixin.config=${mod_id}_forge.mixins.json"
-            ideaModule "${rootProject.name}.${project.name}.main"
+            property 'forge.logging.markers', 'REGISTRIES,MIXIN'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.debug', 'true'
+            property 'mixin.debug.export', 'true'
+            property 'mixin.debug.verbose', 'true'
+            args "-mixin.config=${mod_id}.mixins.json", "-mixin.config=${mod_id}_forge.mixins.json"
+            environment "MOD_CLASSES", "${sourceSets.main.output.classesDirs.asPath};${sourceSets.main.output.resourcesDir.path};${project(':Common').sourceSets.main.output.classesDirs.asPath};${project(':Common').sourceSets.main.output.resourcesDir.path}"
         }
         data {
             workingDirectory project.file('run')
-            ideaModule "${rootProject.name}.${project.name}.main"
-        }
-        modDataRun {
-            source sourceSets.main
-            source project(":Common").sourceSets.main
+            property 'forge.logging.markers', 'REGISTRIES,MIXIN'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.debug', 'true'
+            property 'mixin.debug.export', 'true'
+            property 'mixin.debug.verbose', 'true'
+            args '--mod', mod_id, '--all', '--output', project(':Common').file('src/generated/resources'), '--existing', project(':Common').file('src/main/resources'), "-mixin.config=${mod_id}.mixins.json", "-mixin.config=${mod_id}_forge.mixins.json"
+            environment "MOD_CLASSES", "${sourceSets.main.output.classesDirs.asPath};${sourceSets.main.output.resourcesDir.path};${project(':Common').sourceSets.main.output.classesDirs.asPath};${project(':Common').sourceSets.main.output.resourcesDir.path}"
         }
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    compileOnly project(":Common")
-    library 'blue.endless:jankson:1.2.1'
+    minecraft "net.minecraftforge:forge:1.20.1-47.2.32"
+    implementation project(":Common")
+    shade 'blue.endless:jankson:1.2.1'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation 'blue.endless:jankson:1.2.1'
+    implementation 'org.spongepowered:mixin:0.8.5'
 }
 
 mixin {
-    add sourceSets.main, "${mod_id}_forge.mixins.json"
+    add project(":Common").sourceSets.main, "${mod_id}.refmap.json"
+    add sourceSets.main, "${mod_id}_forge.refmap.json"
+    config "${mod_id}.mixins.json"
     config "${mod_id}_forge.mixins.json"
 }
 
-tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
+tasks.withType(JavaCompile).configureEach {
+    if (it.name != 'compileTestJava') {
+        source(project(":Common").sourceSets.main.allSource)
+        options.annotationProcessorPath = configurations.annotationProcessor
+        options.compilerArgs += [
+                "-Aorg.spongepowered.asm.mixin.debug=true",
+                "-Aorg.spongepowered.asm.mixin.verify=true",
+                "-Aorg.spongepowered.asm.mixin.refMapRemappingFile=${projectDir}/build/createSrgToMcp/output.srg"
+        ]
+        doFirst {
+            println "Mixin compiler args for ${it.name}: ${options.compilerArgs}"
+            println "Processing sources for ${it.name}: ${source}"
+        }
+    }
 }
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     inputs.property "mod_id", "${mod_id}"
     from(project(":Common").sourceSets.main.resources) {
-        include '**/*.json', '**/*.json5', '**/*.toml', '**/*.mcmeta'
-        exclude 'block_swap_advanced.mixins.json', 'block_swap_advanced.refmap.json'
+        include '**/*.json', '**/*.json5', '**/*.toml', '**/*.mcmeta', 'block_swap_advanced.mixins.json'
+        include 'block_swap.json5'
     }
     from(sourceSets.main.resources) {
-        include 'META-INF/mods.toml', 'block_swap_advanced_forge.mixins.json'
-        exclude 'block_swap_advanced.mixins.json' // Explicitly exclude to avoid conflicts
+        include 'META-INF/mods.toml', 'META-INF/block_swap_advanced_forge.mixins.json'
     }
-    filesMatching("block_swap_advanced_forge.mixins.json") {
-        expand "refmap_target": "${mod_id}_forge.", "mod_id": "${mod_id}"
+    filesMatching("block_swap_advanced.mixins.json") {
+        expand "refmap_target": "${mod_id}."
+    }
+    filesMatching("META-INF/block_swap_advanced_forge.mixins.json") {
+        expand "refmap_target": "${mod_id}_forge."
     }
 }
 
@@ -123,22 +158,24 @@ jar {
 }
 jar.finalizedBy('reobfJar')
 
-task forge_checkForRefmap() {
+tasks.register('forge_checkForRefmap') {
     doLast {
         File file1 = shadowJar.archiveFile.get().asFile
         logger.info("Verifying refmap exists...")
         if (file1.exists()) {
             FileTree files = zipTree(file1)
             Set<String> fileNames = files.getFiles().stream().map(file -> file.getName()).collect(Collectors.toSet())
-            String forgeRefmap = "${mod_id}_forge.refmap.json"
-            if (!fileNames.contains(forgeRefmap)) {
-                throw new IllegalStateException("Refmap ${forgeRefmap} is missing.")
+            String forgeRefmap = "block_swap_advanced_forge.refmap.json"
+            String commonRefmap = "block_swap_advanced.refmap.json"
+            if (!fileNames.contains(forgeRefmap) || !fileNames.contains(commonRefmap)) {
+                throw new IllegalStateException("Refmap ${forgeRefmap} or ${commonRefmap} is missing.")
             }
+            logger.info("Refmaps ${forgeRefmap} and ${commonRefmap} found!")
         } else {
-            throw new IllegalStateException("File is missing.")
+            throw new IllegalStateException("File ${file1} is missing.")
         }
-        logger.info("Refmap ${forgeRefmap} found!")
     }
 }
 
 String changelogText = projectDir.toPath().getParent().resolve("CHANGELOG.md").getText('UTF-8')
+//

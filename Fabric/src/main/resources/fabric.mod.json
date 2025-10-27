@@ -31,7 +31,7 @@
     "sources": "https://github.com/PotionSeeker/Block-Swap-Advanced"
   },
   "license": "LGPLv3",
-  "icon": "assets/block_swap_advanced/block_swap_advanced_edition.png",
+  "icon": "assets/block_swap_advanced/block_swap_advanced.png",
   "environment": "*",
   "entrypoints": {
     "main": [

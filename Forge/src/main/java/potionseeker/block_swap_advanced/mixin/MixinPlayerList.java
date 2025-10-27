@@ -13,8 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerList.class)
 public abstract class MixinPlayerList {
-
-    @Inject(method = "sendLevelInfo", at = @At(value = "HEAD"))
+    @Inject(method = {"sendLevelInfo(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/server/level/ServerLevel;)V"}, at = @At(value = "HEAD"))
     private void sendServerConfig(ServerPlayer playerIn, ServerLevel worldIn, CallbackInfo ci) {
         NetworkHandler.sendToClient(playerIn, new ClientConfigSyncPacket(BlockSwapConfig.getConfig(true)));
     }
