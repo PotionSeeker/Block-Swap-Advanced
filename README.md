@@ -7,7 +7,7 @@
 <img width="1168" height="748" alt="block_swap_demo" src="https://github.com/user-attachments/assets/e8c0f865-1232-48f2-8e71-3f85f4b7b8d4" />
 
 # Block Swapping Configuration
-By modifying a config file called block_swap.json5, players are able to swap any number of blocks from one type into another using a variety of different options.
+By modifying a config file called block_swap.json5, players are able to swap any number of blocks from one type into another using a variety of different options: you can make sure that all ores from a variety of different mods are the same type, or you could turn the Nether into a frozen wasteland.
 
 The config file is stored in 'serverconfig/block_swap.json5' for each world (e.g., 'world/serverconfig/block_swap.json5')
 
@@ -23,7 +23,7 @@ These are all the currently availible options that can be used to define how blo
         (e.g., {"Name": "minecraft:pointed_dripstone", "Properties": {"thickness": "tip"}}).
 
 ### Optional 'core' options:
-- replace_placement (boolean, default: true): Whether to swap blocks when placed by players or entities. Ignored if only_replace_placements is true.
+- replace_placement (boolean, default: true): Defines if blocks are swapped when placed by players or entities. You can also use 'only_replace_placements' if you want only placed blocks to be swapped.
 
 - min_y (integer, default: world min height): Minimum Y level for swaps. Don't use unless setting a value other than the min world height.
 - max_y (integer, default: world max height): Maximum Y level for swaps. Don't use unless setting a value other than the max world height.
@@ -46,8 +46,8 @@ These are all the currently availible options that can be used to define how blo
 - structures_blacklist (list<string>, default: []): Structure IDs where swaps are prevented (e.g., ["minecraft:mineshaft"]).
   
 ### Boolean flags:
-- only_replace_placement (boolean, default: false): Whether block swaps should be limited to ONLY occur for player block placement (skip generation/retro_gen/redo_gen).
-- defer_swap (boolean, default: false): Whether to delay swapping until after chunk generation features complete, allowing dependent blocks to generate (e.g., pointed_dripstone depends on dripstone_block being generated).
+- only_replace_placement (boolean, default: false): Defines if block swaps should be limited to ONLY occur for player block placement (skip generation/retro_gen/redo_gen).
+- defer_swap (boolean, default: false): Defines if swapping should be delayed until after feature generation completes, allowing dependent blocks to generate (e.g., pointed_dripstone depends on dripstone_block being generated).
 
 # Notes
 - An example 'block_swap.json5' can be found in the mod's config folder (block_swap_advanced). This can be used as a template in 'defaultconfig'
@@ -58,7 +58,7 @@ These are all the currently availible options that can be used to define how blo
 - To have swaps reload every time the world is loaded, use 'redo_gen'.
 - When using 'min_y_buffer' or 'max_y_buffer', buffer zones create a gradual transition for more natural-looking block swaps.
 - Use 'defer_swap' for blocks that other blocks depend on during generation (for example, if you modify dripstone_block without defer_swap, pointed_dripstone won't generate. To avoid this, use defer_swap).
-- When swapping occurs for a large amount of blocks, there may be lag during world load. You can use 'chunk_swap_range' to limit block swapping to only occur within a certain range of players to help with preformance.
+- When swapping occurs for a large amount of blocks, there may be lag during world load. You can use 'chunk_swap_range' to limit block swapping to only occur within a certain chunk range of players to help with preformance.
 
  - Report issues or request features via the mod's github (https://github.com/PotionSeeker/Block-Swap-Advanced).
  - Check logs (latest.log) with verbose_logging enabled for debugging. Be careful as using 'verbose_logging' can cause lag due to adding information to latest.log.
@@ -69,14 +69,19 @@ These are all the currently availible options that can be used to define how blo
 <img width="425" height="315" alt="midas_house_1" src="https://github.com/user-attachments/assets/85a51164-94cf-400e-9886-97dedd0fac47" />
 
 # ToDo List
-- Add new config option: conditional_swap - swap blocks only when conditional properties are met:
+- Update to 1.21.1 and more?
+- Backport to 1.19.2 and less?
+- New config option: conditional_swap - swap blocks only when conditional properties are met:
 
         (e.g., swap basalt with pointed_dripstone, but only if there is air above or below)
         (e.g., swap sand with glass, but only if there is lava in any direction around it)
-- Update to 1.21.1 and more?
-- Backport to 1.19.2 and less?
-- Add more swap configurations?
+        (e.g., swap air with grass, but only if there is grass_block below)
+- New config option: x_z_buffer_zone - applies buffer around swapped blocks on the x and z axis.
+- New config option: player_swap_range - limit block swapping to only occur within a certain spherical range around players.
+- Custom in-world block swapping and block swap gui?
+- Add even more swap configurations?
 
 # Credit
 - Block Swap Advanced is a rewrite and expansion of Corgi_Taco's 'Block Swap' mod and as such it uses the same license
 - Credit to Corgi Taco and J.T. McQuigg for their work on the original 'Block Swap' mod
+- Block Swap Advanced uses json5 format from the 'Jankson' Maven Repository (https://mvnrepository.com/artifact/blue.endless)
