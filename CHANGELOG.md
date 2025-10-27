@@ -1,2 +1,3 @@
 # 1.0.0
-* Initial Release
+* Forge: Initial Release
+* Fabric: Initial Release
