@@ -2,7 +2,7 @@
 <img width="1213" height="186" alt="block_swap_advanced_edition" src="https://github.com/user-attachments/assets/6639f56f-2127-405a-83a6-7f13e9d92bb1" />
 
 # Block Swap Advanced
-'Block Swap Advanced' is a utility / world gen mod which provides players with a way to modify the blocks that make up their world by swapping them around: Control swaps based on block properties, Control the dimension, biome, or structure where swaps occur, Limit swaps to world generation or player placement, Limit swaps to a specific height range, Add some randomness or gradiation, and more...
+'Block Swap Advanced' is a utility / world gen mod which Provides players with a way to modify the blocks that make up their world by swapping them around during world gen and beyond: Control swaps based on block properties, Control the dimension, biome, or structure where swaps occur, Limit swaps to world generation or player placement, Limit swaps to a specific height range, Add some randomness or gradation, and more...
 
 <img width="1168" height="748" alt="block_swap_demo" src="https://github.com/user-attachments/assets/e8c0f865-1232-48f2-8e71-3f85f4b7b8d4" />
 
@@ -14,7 +14,7 @@ The config file is stored in 'serverconfig/block_swap.json5' for each world (e.g
 Players can set up a global block swap template that will be copied to all newly generated worlds. This is done by placing a config in the 'defaultconfigs' folder (e.g. 'defaultconfigs/block_swap.json5')
         
 ## Available 'swapper' Options
-These are all the currently availible options that can be used to define how blocks get swapped.
+These are all the currently availible options that can be used to define how blocks get swapped:
 ### Required 'core' options:
 - old (BlockState, required): The block that will get replaced (e.g., {"Name": "minecraft:cobblestone"}).
 - new (BlockState, required): The new block to replace the old block (e.g., {"Name": "minecraft:diamond_block"}).
@@ -71,17 +71,16 @@ These are all the currently availible options that can be used to define how blo
 # ToDo List
 - Update to 1.21.1 and more?
 - Backport to 1.19.2 and less?
-- New config option: conditional_swap - swap blocks only when conditional properties are met:
+- New config option: conditional_swap - swap blocks only when conditional properties are met
 
         (e.g., swap basalt with pointed_dripstone, but only if there is air above or below)
         (e.g., swap sand with glass, but only if there is lava in any direction around it)
         (e.g., swap air with grass, but only if there is grass_block below)
-- New config option: x_z_buffer_zone - applies buffer around swapped blocks on the x and z axis.
+- New config option: x_z_buffer_zone - applies buffer around swapped blocks on the x and z axis (in-progress)
 - New config option: player_swap_range - limit block swapping to only occur within a certain spherical range around players.
-- Custom in-world block swapping and block swap gui?
+- Custom in-world block swapping and block swap gui (in-progress)
 - Add even more swap configurations?
 
 # Credit
-- Block Swap Advanced is a rewrite and expansion of Corgi_Taco's 'Block Swap' mod and as such it uses the same license
-- Credit to Corgi Taco and J.T. McQuigg for their work on the original 'Block Swap' mod
+- Block Swap Advanced is a remake and expansion inspired by Corgi_Taco's 'Block Swap' mod. Credit to Corgi Taco and J.T. McQuigg for their work on the original mod
 - Block Swap Advanced uses json5 format from the 'Jankson' Maven Repository (https://mvnrepository.com/artifact/blue.endless)
